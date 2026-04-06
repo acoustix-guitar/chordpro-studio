@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help - ChordPro Studio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #000000; }
+        .content-container { max-width: 800px; margin: 2rem auto; padding: 2rem; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        h1 { font-size: 2.25rem; font-weight: 800; margin-bottom: 1.5rem; color: #000000; }
+        h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+        p { margin-bottom: 1rem; line-height: 1.6; }
+        code { background: #f1f5f9; padding: 0.2rem 0.4rem; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
+        pre { background: #1e293b; color: #f8fafc; padding: 1rem; border-radius: 8px; overflow-x: auto; margin-bottom: 1.5rem; font-size: 0.9em; }
+        .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: #000000; font-weight: 600; text-decoration: none; margin-bottom: 2rem; }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="content-container">
+        <a href="chord-pro-studio.html" class="back-link">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Editor
+        </a>
+        <a href="index.html" class="back-link ml-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            Home
+        </a>
+
+        <h1>ChordPro Studio Help</h1>
+        
+        <p>Welcome to <strong>ChordPro Studio</strong>, a professional tool for creating, styling, and exporting songsheets in ChordPro format.</p>
+
+        <h2>1. The Editor</h2>
+        <p>The editor uses the standard <strong>ChordPro</strong> format. Chords are placed in square brackets <code>[ ]</code> within the lyrics.</p>
+        <pre>
+{title: Hallelujah}
+{subtitle: Leonard Cohen}
+
+[C]I heard there was a [Am]secret chord
+That [C]David played and it [Am]pleased the Lord
+But [F]you don't really [G]care for music, [C]do you? [G]</pre>
+        <p>Common directives include:</p>
+        <ul>
+            <li><code>{title: Name}</code> - Song title</li>
+            <li><code>{subtitle: Artist}</code> - Artist name</li>
+            <li><code>{comment: Text}</code> - General comments or instructions</li>
+            <li><code>{start_of_chorus}</code> / <code>{soc}</code> - Marks the beginning of a chorus</li>
+            <li><code>{end_of_chorus}</code> / <code>{eoc}</code> - Marks the end of a chorus</li>
+        </ul>
+
+        <h2>2. Style & Layout</h2>
+        <p>Use the top navigation bar to customize the look of your songsheet:</p>
+        <ul>
+            <li><strong>Line Spacing:</strong> Adjust the vertical space between lines.</li>
+            <li><strong>Fonts:</strong> Choose different fonts for Title, Artist, Lyrics, Chords, and Comments.</li>
+            <li><strong>Sizes & Colors:</strong> Change the font size and color for each element individually.</li>
+            <li><strong>Chorus Styling:</strong> Toggle indentation and vertical lines for chorus blocks.</li>
+        </ul>
+
+        <h2>3. Strumming Pattern Editor</h2>
+        <p>Located in the left sidebar, this tool helps you visualize rhythm:</p>
+        <ul>
+            <li>Select a <strong>Time Signature</strong> (4/4, 3/4, or 6/8).</li>
+            <li>Click on the slots to toggle <strong>Downstrokes (↓)</strong>, <strong>Upstrokes (↑)</strong>, or empty beats.</li>
+            <li>Adjust <strong>BPM</strong> and <strong>Scale</strong> to change the size and speed metadata.</li>
+            <li>Click <strong>"Insert Pattern"</strong> to add the directive to your song.</li>
+        </ul>
+
+        <h2>4. Chord Diagram Editor</h2>
+        <p>Create custom chord diagrams if a chord isn't in the built-in library:</p>
+        <ul>
+            <li>Enter the <strong>Chord Name</strong>.</li>
+            <li>Click on the fretboard grid to place fingers (dots).</li>
+            <li>Specify <strong>Barre</strong> frets if needed.</li>
+            <li>Click <strong>"Define"</strong> to add the custom chord to your song.</li>
+        </ul>
+
+        <h2>5. TAB Creator</h2>
+        <p>Create professional guitar and bass tablature with the standalone TAB Creator:</p>
+        <ul>
+            <li><strong>String Count:</strong> Choose between 4 to 8 strings with automatic tuning labels.</li>
+            <li><strong>Interactive Grid:</strong> Click cells to cycle fret numbers (0-24) or right-click to clear.</li>
+            <li><strong>Bar Lines:</strong> Add vertical bar lines to structure your TAB.</li>
+            <li><strong>Scaling:</strong> Use the slider to proportionally resize the graphical preview (up to 5x).</li>
+            <li><strong>Export:</strong> Download your TAB as high-quality <strong>SVG</strong> or <strong>PNG</strong> images, or copy the ChordPro text.</li>
+        </ul>
+
+        <h2>6. PDF Export</h2>
+        <p>When you're ready, click the <strong>"PDF Export"</strong> button in the header. You can choose between a <strong>Single Column</strong> or <strong>Two Column</strong> layout before saving your file.</p>
+
+        <h2>7. Keyboard Shortcuts</h2>
+        <p>Quickly insert common chords while typing. We recommend using <strong>Alt + [Letter]</strong> to avoid conflicts with standard browser shortcuts (like Ctrl+C for copy):</p>
+        <ul>
+            <li><code>Alt + A</code>: [A]</li>
+            <li><code>Alt + B</code>: [B]</li>
+            <li><code>Alt + C</code>: [C]</li>
+            <li><code>Alt + D</code>: [D]</li>
+            <li><code>Alt + E</code>: [E]</li>
+            <li><code>Alt + F</code>: [F]</li>
+            <li><code>Alt + G</code>: [G]</li>
+        </ul>
+        <p>The cursor is placed inside the brackets after the letter, so you can immediately add modifiers like 'm' or '7'.</p>
+
+        <div class="mt-12 pt-8 border-t border-slate-200 text-[12px] text-black">
+            &copy; 2026 ChordPro Studio. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

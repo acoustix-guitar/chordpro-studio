@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hilfe - ChordPro Studio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #000000; }
+        .content-container { max-width: 800px; margin: 2rem auto; padding: 2rem; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        h1 { font-size: 2.25rem; font-weight: 800; margin-bottom: 1.5rem; color: #000000; }
+        h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
+        p { margin-bottom: 1rem; line-height: 1.6; }
+        code { background: #f1f5f9; padding: 0.2rem 0.4rem; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
+        pre { background: #1e293b; color: #f8fafc; padding: 1rem; border-radius: 8px; overflow-x: auto; margin-bottom: 1.5rem; font-size: 0.9em; }
+        .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: #000000; font-weight: 600; text-decoration: none; margin-bottom: 2rem; }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="content-container">
+        <a href="chord-pro-studio.html" class="back-link">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Zurück zum Editor
+        </a>
+        <a href="index.html" class="back-link ml-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            Startseite
+        </a>
+
+        <h1>ChordPro Studio Hilfe</h1>
+        
+        <p>Willkommen bei <strong>ChordPro Studio</strong>, einem professionellen Tool zum Erstellen, Gestalten und Exportieren von Songblättern im ChordPro-Format.</p>
+
+        <h2>1. Der Editor</h2>
+        <p>Der Editor verwendet das standardmäßige <strong>ChordPro</strong>-Format. Akkorde werden in eckigen Klammern <code>[ ]</code> innerhalb des Songtexts platziert.</p>
+        <pre>
+{title: Hallelujah}
+{subtitle: Leonard Cohen}
+
+[C]I heard there was a [Am]secret chord
+That [C]David played and it [Am]pleased the Lord
+But [F]you don't really [G]care for music, [C]do you? [G]</pre>
+        <p>Häufige Direktiven sind:</p>
+        <ul>
+            <li><code>{title: Name}</code> - Songtitel</li>
+            <li><code>{subtitle: Künstler}</code> - Name des Künstlers</li>
+            <li><code>{comment: Text}</code> - Allgemeine Kommentare oder Anweisungen</li>
+            <li><code>{start_of_chorus}</code> / <code>{soc}</code> - Markiert den Beginn eines Refrains</li>
+            <li><code>{end_of_chorus}</code> / <code>{eoc}</code> - Markiert das Ende eines Refrains</li>
+        </ul>
+
+        <h2>2. Stil & Layout</h2>
+        <p>Verwenden Sie die obere Navigationsleiste, um das Aussehen Ihres Songblatts anzupassen:</p>
+        <ul>
+            <li><strong>Zeilenabstand:</strong> Passen Sie den vertikalen Abstand zwischen den Zeilen an.</li>
+            <li><strong>Schriftarten:</strong> Wählen Sie verschiedene Schriftarten für Titel, Künstler, Songtext, Akkorde und Kommentare.</li>
+            <li><strong>Größen & Farben:</strong> Ändern Sie die Schriftgröße und Farbe für jedes Element einzeln.</li>
+            <li><strong>Refrain-Styling:</strong> Schalten Sie Einrückungen und vertikale Linien für Refrain-Blöcke ein oder aus.</li>
+        </ul>
+
+        <h2>3. Strumming-Pattern-Editor</h2>
+        <p>Dieses Tool in der linken Seitenleiste hilft Ihnen, Rhythmen zu visualisieren:</p>
+        <ul>
+            <li>Wählen Sie eine <strong>Taktart</strong> (4/4, 3/4 oder 6/8).</li>
+            <li>Klicken Sie auf die Slots, um <strong>Abschläge (↓)</strong>, <strong>Aufschläge (↑)</strong> oder leere Beats umzuschalten.</li>
+            <li>Passen Sie <strong>BPM</strong> und <strong>Skalierung</strong> an, um die Größe und Geschwindigkeits-Metadaten zu ändern.</li>
+            <li>Klicken Sie auf <strong>"Insert Pattern"</strong>, um die Direktive zu Ihrem Song hinzuzufügen.</li>
+        </ul>
+
+        <h2>4. Akkord-Diagramm-Editor</h2>
+        <p>Erstellen Sie benutzerdefinierte Akkorddiagramme, wenn ein Akkord nicht in der integrierten Bibliothek enthalten ist:</p>
+        <ul>
+            <li>Geben Sie den <strong>Akkordnamen</strong> ein.</li>
+            <li>Klicken Sie auf das Griffbrett-Raster, um Finger (Punkte) zu platzieren.</li>
+            <li>Geben Sie bei Bedarf <strong>Barre</strong>-Bünde an.</li>
+            <li>Klicken Sie auf <strong>"Define"</strong>, um den benutzerdefinierten Akkord zu Ihrem Song hinzuzufügen.</li>
+        </ul>
+
+        <h2>5. TAB-Editor</h2>
+        <p>Erstellen Sie professionelle Gitarren- und Bass-Tabulaturen mit dem eigenständigen TAB-Editor:</p>
+        <ul>
+            <li><strong>Saitenanzahl:</strong> Wählen Sie zwischen 4 und 8 Saiten mit automatischen Tuning-Labels.</li>
+            <li><strong>Interaktives Raster:</strong> Klicken Sie auf Zellen, um Bundnummern (0-24) zu durchlaufen, oder klicken Sie rechts zum Löschen.</li>
+            <li><strong>Taktstriche:</strong> Fügen Sie vertikale Taktstriche hinzu, um Ihre TABs zu strukturieren.</li>
+            <li><strong>Skalierung:</strong> Verwenden Sie den Schieberegler, um die grafische Vorschau proportional zu vergrößern (bis zu 5x).</li>
+            <li><strong>Export:</strong> Laden Sie Ihre TABs als hochwertige <strong>SVG</strong>- oder <strong>PNG</strong>-Bilder herunter oder kopieren Sie den ChordPro-Text.</li>
+        </ul>
+
+        <h2>6. PDF-Export</h2>
+        <p>Wenn Sie bereit sind, klicken Sie auf die Schaltfläche <strong>"PDF Export"</strong> im Header. Sie können zwischen einem <strong>einspaltigen</strong> oder <strong>zweispaltigen</strong> Layout wählen, bevor Sie Ihre Datei speichern.</p>
+
+        <h2>7. Tastaturkürzel</h2>
+        <p>Fügen Sie beim Tippen schnell gängige Akkorde ein. Wir empfehlen die Verwendung von <strong>Alt + [Buchstabe]</strong>, um Konflikte mit Standard-Browser-Kürzeln (wie Strg+C zum Kopieren) zu vermeiden:</p>
+        <ul>
+            <li><code>Alt + A</code>: [A]</li>
+            <li><code>Alt + B</code>: [B]</li>
+            <li><code>Alt + C</code>: [C]</li>
+            <li><code>Alt + D</code>: [D]</li>
+            <li><code>Alt + E</code>: [E]</li>
+            <li><code>Alt + F</code>: [F]</li>
+            <li><code>Alt + G</code>: [G]</li>
+        </ul>
+        <p>Der Cursor wird innerhalb der Klammern nach dem Buchstaben platziert, sodass Sie sofort Modifikatoren wie 'm' oder '7' hinzufügen können.</p>
+
+        <div class="mt-12 pt-8 border-t border-slate-200 text-[12px] text-black">
+            &copy; 2026 ChordPro Studio. Alle Rechte vorbehalten.
+        </div>
+    </div>
+</body>
+</html>
