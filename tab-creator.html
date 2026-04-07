@@ -430,7 +430,7 @@
             const displayHeight = baseHeight * scale;
 
             // Use viewBox for proportional scaling - this is the most reliable method
-            let svg = `<svg width="${displayWidth}" height="${displayHeight}" viewBox="0 0 ${baseWidth} ${baseHeight}" xmlns="http://www.w3.org/2000/svg" style="max-width: none; max-height: none; flex-shrink: 0;">`;
+            let svg = `<svg width="${displayWidth}" height="${displayHeight}" viewBox="0 0 ${baseWidth} ${baseHeight}" xmlns="http://www.w3.org/2000/svg" style="max-width: none; max-height: none; flex-shrink: 0; background: transparent;">`;
             
             const gridTop = padding;
 
@@ -467,9 +467,7 @@
                         const bottom = gridTop + (s === numRows - 1 ? s * rowHeight + rowHeight / 2 : (s + 1) * rowHeight);
                         svg += `<line x1="${currentX + colWidthPx / 2}" y1="${top}" x2="${currentX + colWidthPx / 2}" y2="${bottom}" stroke="black" stroke-width="1.5" />`;
                     } else if (val !== '-') {
-                        // Draw white background for the note
-                        const textWidth = val.length * charWidth * 0.8;
-                        svg += `<rect x="${currentX + (colWidthPx - textWidth) / 2}" y="${y - 8}" width="${textWidth}" height="16" fill="white" />`;
+                        // Draw note
                         svg += `<text x="${currentX + colWidthPx / 2}" y="${y + 5}" text-anchor="middle" font-family="Roboto Mono, monospace" font-size="14" font-weight="bold" fill="black">${val}</text>`;
                     }
                 }
