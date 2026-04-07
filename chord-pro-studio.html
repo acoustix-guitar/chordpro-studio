@@ -637,6 +637,15 @@
                 content: none;
             }
         }
+        .pdf-export-mode-active .page-break {
+            height: 0 !important;
+            margin: 0 !important;
+            border: none !important;
+            background: transparent !important;
+        }
+        .pdf-export-mode-active .page-break::after {
+            content: none !important;
+        }
         .section-header { font-weight: bold; }
         .word-group { 
             display: flex; 
@@ -852,7 +861,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                 </svg>
-                <h1 class="text-xl font-bold text-black">ACOUSTIX GUITAR'S ChordPro Studio</h1>
+                <h1 class="text-xl font-bold text-black">ChordPro Studio</h1>
             </a>
             <div class="flex items-center gap-2 ml-4">
                 <a href="help.html" class="text-[12px] font-bold text-black hover:underline">Help (EN)</a>
@@ -883,6 +892,13 @@
 
     <!-- Top Navigation Menu -->
     <nav id="top-nav" class="bg-white border-b border-slate-200 flex items-center px-4 gap-2 overflow-x-auto no-scrollbar relative">
+        <!-- New Song Button -->
+        <button onclick="newSong()" class="flex items-center gap-2 px-3 py-2 text-[13px] font-bold text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-blue-100 whitespace-nowrap">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            New Song
+        </button>
+        <div class="h-6 w-px bg-slate-200 mx-1"></div>
+
         <!-- Style Dropdown -->
         <div class="nav-dropdown">
             <div class="nav-dropdown-trigger" onclick="toggleDropdown('dropdown-style')">
@@ -1238,6 +1254,11 @@
             </div>
             <div id="dropdown-file" class="nav-dropdown-content">
                 <div class="grid grid-cols-1 gap-2">
+                    <button onclick="newSong()" class="flex items-center gap-2 px-3 py-2 text-[12px] hover:bg-slate-100 rounded transition-colors font-bold text-blue-600">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        New Song
+                    </button>
+                    <div class="border-t border-slate-100 my-1"></div>
                     <button onclick="saveToLibrary()" class="flex items-center gap-2 px-3 py-2 text-[12px] hover:bg-slate-100 rounded transition-colors font-bold text-blue-600">
                         <i data-lucide="save" class="w-4 h-4"></i>
                         Save to Library
@@ -1257,6 +1278,7 @@
                         Load File
                         <input type="file" id="load-file" class="hidden" onchange="loadFile(event)" accept=".cho,.txt,.chordpro">
                     </label>
+                    <input type="file" id="image-upload" class="hidden" onchange="handleImageUpload(event)" accept="image/*">
                 </div>
             </div>
         </div>
@@ -1576,7 +1598,20 @@
 
         <!-- Editor Spalte -->
         <section id="editor-section" class="editor-column no-print">
-            <div class="bg-slate-50 px-4 py-2 border-b border-black text-[13px] font-semibold text-black uppercase">ChordPro Editor</div>
+            <div class="bg-slate-50 px-4 py-2 border-b border-black text-[13px] font-semibold text-black uppercase flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span>ChordPro Editor</span>
+                    <span id="autosave-status" class="text-[10px] text-slate-400 normal-case font-normal transition-opacity duration-500 opacity-0">Saved</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="undo()" id="undo-btn" title="Undo (Ctrl+Z)" class="p-1 hover:bg-slate-200 rounded transition-colors disabled:opacity-30" disabled>
+                        <i data-lucide="undo-2" class="w-4 h-4"></i>
+                    </button>
+                    <button onclick="redo()" id="redo-btn" title="Redo (Ctrl+Y)" class="p-1 hover:bg-slate-200 rounded transition-colors disabled:opacity-30" disabled>
+                        <i data-lucide="redo-2" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
             <textarea id="chordpro-input" class="flex-1 p-4 text-[15px] leading-relaxed text-black bg-white font-mono whitespace-pre overflow-x-auto" placeholder="Enter your ChordPro text here..." wrap="off"></textarea>
         </section>
 
@@ -1747,6 +1782,7 @@
             // Open first app by default
             openApp('song-part-helper');
             renderSongList();
+            saveHistory(); // Initial history state
         });
 
         function renderGraphicalTab(tabText) {
@@ -1796,6 +1832,63 @@
         const preview = document.getElementById('preview-pane');
         
         let imageStore = {};
+
+        // History Management (Undo/Redo)
+        let undoStack = [];
+        let redoStack = [];
+        const MAX_HISTORY = 50;
+        let historyTimeout;
+
+        function saveHistory() {
+            const currentState = input.value;
+            // Only save if different from last state
+            if (undoStack.length === 0 || undoStack[undoStack.length - 1] !== currentState) {
+                undoStack.push(currentState);
+                if (undoStack.length > MAX_HISTORY) {
+                    undoStack.shift();
+                }
+                redoStack = []; // Clear redo stack on new change
+                updateUndoRedoButtons();
+            }
+        }
+
+        function undo() {
+            if (undoStack.length > 1) {
+                redoStack.push(undoStack.pop());
+                const previousState = undoStack[undoStack.length - 1];
+                input.value = previousState;
+                updatePreview();
+                autoSaveSession();
+                updateUndoRedoButtons();
+            }
+        }
+
+        function redo() {
+            if (redoStack.length > 0) {
+                const nextState = redoStack.pop();
+                undoStack.push(nextState);
+                input.value = nextState;
+                updatePreview();
+                autoSaveSession();
+                updateUndoRedoButtons();
+            }
+        }
+
+        function updateUndoRedoButtons() {
+            const undoBtn = document.getElementById('undo-btn');
+            const redoBtn = document.getElementById('redo-btn');
+            if (undoBtn) undoBtn.disabled = undoStack.length <= 1;
+            if (redoBtn) redoBtn.disabled = redoStack.length === 0;
+        }
+
+        function newSong() {
+            saveHistory();
+            input.value = "{title: New Song}\n{artist: }\n\n";
+            imageStore = {};
+            updatePreview();
+            autoSaveSession();
+            saveHistory();
+        }
 
         function processIncomingText(text) {
             if (!text) return text;
@@ -2913,6 +3006,15 @@ But I [D]don't know [A7sus4]how
                                 #pdf-export-content {
                                     background-color: white !important;
                                 }
+                                .page-break {
+                                    height: 0 !important;
+                                    margin: 0 !important;
+                                    border: none !important;
+                                    background: transparent !important;
+                                }
+                                .page-break::after {
+                                    content: none !important;
+                                }
                                 .tab-note {
                                     background-color: #ffffff !important;
                                     z-index: 10 !important;
@@ -2962,12 +3064,27 @@ But I [D]don't know [A7sus4]how
 
         // Event Listeners
         input.addEventListener('input', () => {
+            clearTimeout(historyTimeout);
+            historyTimeout = setTimeout(() => {
+                saveHistory();
+            }, 500); // Debounce history saving
             updatePreview();
             autoSaveSession();
         });
 
         // Keyboard Shortcuts for Chords
         input.addEventListener('keydown', (e) => {
+            // Undo: Ctrl+Z
+            if (e.ctrlKey && e.key === 'z') {
+                e.preventDefault();
+                undo();
+            }
+            // Redo: Ctrl+Y or Ctrl+Shift+Z
+            if (e.ctrlKey && (e.key === 'y' || (e.shiftKey && e.key === 'Z'))) {
+                e.preventDefault();
+                redo();
+            }
+            
             // Shortcut Alt+1 for Image Insertion
             if (e.altKey && e.key === '1') {
                 e.preventDefault();
@@ -3230,6 +3347,7 @@ But I [D]don't know [A7sus4]how
 
         function loadExample(key) {
             if (examples[key]) {
+                saveHistory();
                 input.value = examples[key];
                 updatePreview();
                 toggleDropdown(null); // Close dropdown
@@ -3245,6 +3363,7 @@ But I [D]don't know [A7sus4]how
                 if (song.settings) setSettings(song.settings);
                 updatePreview();
                 toggleDropdown(null); // Close dropdown
+                saveHistory();
             }
         }
 
@@ -3293,7 +3412,21 @@ But I [D]don't know [A7sus4]how
                 }
             };
             localStorage.setItem('chordpro_session', JSON.stringify(session));
+            
+            // Show status
+            const statusEl = document.getElementById('autosave-status');
+            if (statusEl) {
+                const now = new Date();
+                statusEl.innerText = `Auto-saved at ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+                statusEl.style.opacity = '1';
+                setTimeout(() => {
+                    statusEl.style.opacity = '0.4';
+                }, 2000);
+            }
         }
+
+        // Periodic auto-save every 30 seconds
+        setInterval(autoSaveSession, 30000);
 
         function toggleDropdown(id) {
             const dropdown = document.getElementById(id);
@@ -3345,6 +3478,7 @@ But I [D]don't know [A7sus4]how
                     if (ml) ml.value = session.margins.left;
                     if (mr) mr.value = session.margins.right;
                 }
+                saveHistory();
             }
         }
 
@@ -3409,6 +3543,7 @@ But I [D]don't know [A7sus4]how
         }
 
         function updateImageInText(index, base64Data) {
+            saveHistory();
             const text = input.value;
             const regex = /\{start_of_image(?::\s*id=([^}]+))?\}[\s\S]*?\{end_of_image\}/g;
             let count = 0;
@@ -3438,6 +3573,7 @@ But I [D]don't know [A7sus4]how
                 input.value = processIncomingText(e.target.result);
                 updatePreview();
                 autoSaveSession();
+                saveHistory();
                 // Reset file input so same file can be uploaded again
                 event.target.value = '';
             };
@@ -3470,6 +3606,7 @@ But I [D]don't know [A7sus4]how
         }
 
         function transposeSong(semitones) {
+            saveHistory();
             const content = input.value;
             
             // 1. Chords in brackets [Am7]
@@ -3493,6 +3630,7 @@ But I [D]don't know [A7sus4]how
         }
 
         function convertToChordPro() {
+            saveHistory();
             const text = input.value;
             const lines = text.split('\n');
             const result = [];
@@ -3649,6 +3787,7 @@ But I [D]don't know [A7sus4]how
         }
 
         function insertChord(name) {
+            saveHistory();
             const start = input.selectionStart;
             const end = input.selectionEnd;
             const text = input.value;
@@ -3762,6 +3901,7 @@ But I [D]don't know [A7sus4]how
         }
 
         function insertTabFromCreator() {
+            saveHistory();
             let tabText = '{start_of_tab}\n';
             const numCols = tabState[0].length;
             
@@ -3808,6 +3948,7 @@ But I [D]don't know [A7sus4]how
         }
 
         function insertDirective(type) {
+            saveHistory();
             const start = input.selectionStart;
             const end = input.selectionEnd;
             const text = input.value;
@@ -3947,6 +4088,7 @@ But I [D]don't know [A7sus4]how
         }
 
         function insertPageBreak() {
+            saveHistory();
             const start = input.selectionStart;
             const end = input.selectionEnd;
             const text = input.value;
