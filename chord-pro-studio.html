@@ -12,6 +12,85 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- ABCJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.2.2/abcjs-basic-min.js"></script>
+    <link rel="stylesheet" href="abcjs-audio.css">
+    <script src="abc-converter.js"></script>
+
+    <script>
+        // Draggable Floating Panel
+        function makeDraggable(el) {
+            const header = el.querySelector('.app-panel-header');
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            
+            if (header) {
+                header.onmousedown = dragMouseDown;
+                header.ontouchstart = dragTouchStart;
+            }
+
+            function dragMouseDown(e) {
+                e = e || window.event;
+                e.preventDefault();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+            }
+
+            function dragTouchStart(e) {
+                const touch = e.touches[0];
+                pos3 = touch.clientX;
+                pos4 = touch.clientY;
+                document.ontouchend = closeDragElement;
+                document.ontouchmove = elementTouchDrag;
+            }
+
+            function elementDrag(e) {
+                e = e || window.event;
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                el.style.top = (el.offsetTop - pos2) + "px";
+                el.style.left = (el.offsetLeft - pos1) + "px";
+                el.style.transform = 'none';
+            }
+
+            function elementTouchDrag(e) {
+                const touch = e.touches[0];
+                pos1 = pos3 - touch.clientX;
+                pos2 = pos4 - touch.clientY;
+                pos3 = touch.clientX;
+                pos4 = touch.clientY;
+                el.style.top = (el.offsetTop - pos2) + "px";
+                el.style.left = (el.offsetLeft - pos1) + "px";
+                el.style.transform = 'none';
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+                document.ontouchend = null;
+                document.ontouchmove = null;
+            }
+        }
+
+        window.addEventListener('load', () => {
+            const abcPanel = document.getElementById('panel-abc-editor');
+            if (abcPanel) makeDraggable(abcPanel);
+
+            setTimeout(() => {
+                if (typeof ABCJS === 'undefined') {
+                    console.error("ABCJS failed to load from CDN");
+                    const paper = document.getElementById('abc-paper');
+                    if (paper) paper.innerHTML = '<div class="p-4 text-red-600 font-bold">CRITICAL: ABCJS library failed to load. Please check your internet connection or try a different browser.</div>';
+                } else {
+                    console.log("ABCJS loaded successfully:", ABCJS.signature);
+                }
+            }, 2000);
+        });
+    </script>
     <style>
         :root {
             --bg-light: #f8fafc;
@@ -83,6 +162,35 @@
         }
         .app-panel.show {
             display: flex;
+        }
+        .floating-panel {
+            position: fixed !important;
+            top: 140px;
+            left: calc(50% - 250px);
+            width: 500px !important;
+            height: auto !important;
+            max-height: 85vh;
+            border: 2px solid #000 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3) !important;
+            z-index: 2147483647 !important;
+            background: white !important;
+            overflow: hidden !important;
+            display: none;
+            flex-direction: column;
+        }
+        .floating-panel.show {
+            display: flex !important;
+        }
+        .floating-panel .app-panel-header {
+            cursor: move;
+            background: #f1f5f9;
+            border-bottom: 2px solid #e2e8f0;
+            user-select: none;
+        }
+        .floating-panel .app-panel-content {
+            overflow-y: auto;
+            max-height: calc(85vh - 60px);
         }
         @keyframes slideIn {
             from { transform: translateX(-20px); opacity: 0; }
@@ -168,6 +276,8 @@
             left: 0;
             background-color: #ffffff;
             min-width: max-content;
+            max-height: 80vh;
+            overflow-y: auto;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             border: 1px solid #000000;
             border-radius: 8px;
@@ -424,6 +534,9 @@
         }
         .song-title { margin-bottom: 0.1rem; font-weight: bold; }
         .song-subtitle { margin-bottom: 0.2rem; }
+        #abc-paper { background: white; min-height: 100px; width: 100%; overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 4px; display: block !important; padding: 0px 10px; }
+        .abc-block { background: white; margin: 1rem 0; width: 100%; overflow-x: auto; display: block !important; padding: 0px 10px; }
+        .abc-block svg { max-width: 100%; height: auto; display: block !important; margin: 0 auto; overflow: visible !important; }
         .section-header, .line, .spacer { 
             display: flex; 
             flex-direction: row;
@@ -843,8 +956,8 @@
             display: block !important;
         }
         .pdf-export-mode .chorus-block, .pdf-export-mode .section-block, .pdf-export-mode .song-header-block {
-            break-inside: auto !important;
-            page-break-inside: auto !important;
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
             margin-bottom: 1rem !important;
             display: block !important;
             float: none !important;
@@ -1087,6 +1200,16 @@
                                     <input type="number" id="spacing-chorus" value="1.2" step="0.1" class="border border-black rounded p-1 text-[12px] w-12" oninput="applyStyles()">
                                 </div>
                             </div>
+                            <div class="flex items-center gap-2 mt-2">
+                                <span class="text-[11px] text-slate-500 font-bold uppercase w-12">Sheet Music</span>
+                                <div class="flex flex-col flex-1">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-[10px] font-bold">Spacing</span>
+                                        <input type="number" id="abc-spacing" value="20" class="w-10 border border-black rounded p-0.5 text-[10px]" oninput="syncInputs('abc-spacing', 'abc-spacing-range'); applyStyles()">
+                                    </div>
+                                    <input type="range" id="abc-spacing-range" min="-50" max="100" step="1" value="20" class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="syncInputs('abc-spacing-range', 'abc-spacing'); applyStyles()">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1319,6 +1442,10 @@
                 <i data-lucide="waves" class="w-6 h-6"></i>
                 <span>Strumming</span>
             </div>
+            <div class="app-icon-btn" onclick="openApp('abc-editor')" id="btn-abc-editor">
+                <i data-lucide="file-music" class="w-6 h-6"></i>
+                <span>Sheet Music</span>
+            </div>
             <div class="mt-auto">
                 <div class="app-icon-btn" onclick="openApp('editor-tools')" id="btn-editor-tools">
                     <i data-lucide="wrench" class="w-6 h-6"></i>
@@ -1354,6 +1481,10 @@
                                 Image
                             </button>
                         </div>
+                        <button onclick="openApp('abc-editor')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold flex items-center justify-center gap-2">
+                            <i data-lucide="file-music" class="w-4 h-4"></i>
+                            Sheet Music (ABC)
+                        </button>
                     </div>
                 </div>
                 <div class="sidebar-section">
@@ -1575,6 +1706,7 @@
             </div>
         </div>
 
+
         <div id="panel-editor-tools" class="app-panel no-print">
             <div class="app-panel-header">
                 <span class="app-panel-title">Editor Tools</span>
@@ -1737,24 +1869,38 @@
     <script>
         // App Panel Management
         function openApp(appId) {
-            // Hide all panels
-            document.querySelectorAll('.app-panel').forEach(p => p.classList.remove('show'));
-            // Deactivate all buttons
-            document.querySelectorAll('.app-icon-btn').forEach(b => b.classList.remove('active'));
-            
-            // Show selected panel
             const panel = document.getElementById('panel-' + appId);
             const btn = document.getElementById('btn-' + appId);
             
-            if (panel && btn) {
+            if (!panel) return;
+
+            const isFloating = panel.classList.contains('floating-panel');
+
+            if (!isFloating) {
+                // Hide other non-floating panels
+                document.querySelectorAll('.app-panel:not(.floating-panel)').forEach(p => {
+                    if (p.id !== panel.id) p.classList.remove('show');
+                });
+                document.querySelectorAll('.app-icon-btn').forEach(b => {
+                    if (b.id !== (btn ? btn.id : '')) b.classList.remove('active');
+                });
+            }
+
+            if (panel.classList.contains('show') && !isFloating) {
+                panel.classList.remove('show');
+                if (btn) btn.classList.remove('active');
+            } else {
                 panel.classList.add('show');
-                btn.classList.add('active');
+                if (btn) btn.classList.add('active');
                 
                 // Initialize app-specific logic
                 if (appId === 'chord-helper') initChordBuilder();
                 if (appId === 'tab-creator') initTabCreator();
                 if (appId === 'diagram-creator') updateFretboardUI();
                 if (appId === 'strumming-pattern') initStrummingGrid();
+                if (appId === 'abc-editor') {
+                    setTimeout(initAbcEditor, 100);
+                }
             }
             
             // Refresh Lucide icons in case any were added
@@ -2292,6 +2438,9 @@ But I [D]don't know [A7sus4]how
             let inImageBlock = false;
             let currentImageData = '';
             let imageBlockIndex = 0;
+            let inAbcBlock = false;
+            let currentAbcData = '';
+            let abcBlockIndex = 0;
 
             const diagEnabled = document.getElementById('diag-toggle')?.checked ?? false;
             const diagPos = 'bottom';
@@ -2443,6 +2592,15 @@ But I [D]don't know [A7sus4]how
                             `;
                         }
                     }
+                    else if (key === 'start_of_abc' || key === 'soabc') {
+                        inAbcBlock = true;
+                        currentAbcData = '';
+                    }
+                    else if (key === 'end_of_abc' || key === 'eoabc') {
+                        inAbcBlock = false;
+                        const blockId = `abc-preview-${abcBlockIndex++}`;
+                        mainHtml += `<div id="${blockId}" class="abc-block my-4" data-abc="${encodeURIComponent(currentAbcData.trim())}"></div>`;
+                    }
                     return;
                 }
 
@@ -2453,6 +2611,11 @@ But I [D]don't know [A7sus4]how
 
                 if (inImageBlock) {
                     currentImageData += line + '\n';
+                    return;
+                }
+
+                if (inAbcBlock) {
+                    currentAbcData += line + '\n';
                     return;
                 }
 
@@ -2502,6 +2665,10 @@ But I [D]don't know [A7sus4]how
 
             if (inBlock) mainHtml += '</div>';
             if (inTabBlock) mainHtml += renderGraphicalTab(currentTabData);
+            if (inAbcBlock) {
+                const blockId = `abc-preview-${abcBlockIndex++}`;
+                mainHtml += `<div id="${blockId}" class="abc-block my-4" data-abc="${encodeURIComponent(currentAbcData.trim())}"></div>`;
+            }
 
             // Generate Diagrams
             let diagramsHtml = '';
@@ -2565,6 +2732,53 @@ But I [D]don't know [A7sus4]how
             const raw = input.value;
             preview.innerHTML = parseChordPro(raw);
             applyStyles();
+            renderAbcBlocks();
+        }
+
+        function renderAbcBlocks(container = document, isExport = false) {
+            const blocks = container.querySelectorAll('.abc-block');
+            if (blocks.length === 0) return;
+
+            if (typeof ABCJS === 'undefined') {
+                setTimeout(() => renderAbcBlocks(container, isExport), 300);
+                return;
+            }
+
+            blocks.forEach((block) => {
+                const abcData = decodeURIComponent(block.dataset.abc);
+                try {
+                    const renderParams = {
+                        responsive: isExport ? undefined : "resize",
+                        add_classes: true,
+                        paddingright: 30,
+                        paddingleft: 10,
+                        paddingbottom: 10,
+                        staffwidth: 740
+                    };
+                    
+                    ABCJS.renderAbc(block, abcData, renderParams);
+                    
+                    // For export, we need to ensure the SVG has explicit dimensions for html2canvas
+                    if (isExport) {
+                        const svgs = block.querySelectorAll('svg');
+                        svgs.forEach(svg => {
+                            // Ensure it has a viewBox and explicit width/height
+                            const width = svg.getAttribute('width');
+                            const height = svg.getAttribute('height');
+                            if (width && height && !svg.getAttribute('viewBox')) {
+                                svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+                            }
+                            // Keep explicit width/height for html2canvas but allow CSS to scale it
+                            svg.style.width = '100%';
+                            svg.style.height = 'auto';
+                            svg.style.display = 'block';
+                            svg.style.margin = '0 auto';
+                        });
+                    }
+                } catch (e) {
+                    console.error("ABCJS render error:", e);
+                }
+            });
         }
 
         function syncInputs(sourceId, targetId) {
@@ -2614,7 +2828,7 @@ But I [D]don't know [A7sus4]how
                     if (id === 'size-subtitle') return '18';
                     if (id === 'color-subtitle') return '#000000';
                     if (id === 'chorus-line-val') return '4';
-                    if (id.includes('val')) return '20';
+                    if (id.includes('val') || id === 'abc-spacing') return '20';
                     if (id.includes('margin')) {
                         if (id.includes('top') || id.includes('bottom')) return '25';
                         return '20';
@@ -2694,9 +2908,14 @@ But I [D]don't know [A7sus4]how
                                 const relativeY = pb.offsetTop; 
                                 const relativeYMm = relativeY / pxPerMm;
                                 const spaceUsedOnPage = relativeYMm % pageHeight;
-                                const spaceToFill = pageHeight - spaceUsedOnPage;
-                                // If spaceToFill is very small, it might mean we are already at the start of a page
-                                // but we want to force a break anyway.
+                                let spaceToFill = pageHeight - spaceUsedOnPage;
+                                
+                                // If we are already at the top of a page (within 2mm), 
+                                // don't add a full page of height, just a tiny bit to trigger the break
+                                if (spaceToFill > pageHeight - 2) {
+                                    spaceToFill = 2; 
+                                }
+                                
                                 pb.style.height = `${spaceToFill}mm`;
                             });
 
@@ -2877,6 +3096,14 @@ But I [D]don't know [A7sus4]how
                 }
             });
 
+            // ABC Block Spacing
+            const abcSpacing = getVal('abc-spacing') || '20';
+            const abcBlocks = document.querySelectorAll('.abc-block');
+            abcBlocks.forEach(el => {
+                el.style.marginTop = abcSpacing + 'px';
+                el.style.marginBottom = abcSpacing + 'px';
+            });
+
             // Diagram Spacing
             const diagSpacing = getVal('diag-spacing');
             const diagramRows = document.querySelectorAll('.diagram-row');
@@ -2944,6 +3171,7 @@ But I [D]don't know [A7sus4]how
             
             // Populate export content
             exportContent.innerHTML = previewPane.innerHTML;
+            renderAbcBlocks(exportContent, true);
             
             // Calculate dimensions for the overlay preview
             const paperWidths = { 'a4': 210, 'a3': 297, 'a5': 148, 'letter': 215.9, 'legal': 215.9 };
@@ -2972,6 +3200,7 @@ But I [D]don't know [A7sus4]how
         }
 
         async function startFinalExport() {
+            const abcSpacing = document.getElementById('abc-spacing')?.value || '20';
             const exportContent = document.getElementById('pdf-export-content');
             const title = document.querySelector('.song-title')?.innerText || 'Songsheet';
             const format = document.getElementById('pdf-format').value;
@@ -3007,10 +3236,12 @@ But I [D]don't know [A7sus4]how
                                     background-color: white !important;
                                 }
                                 .page-break {
-                                    height: 0 !important;
+                                    height: 1px !important;
                                     margin: 0 !important;
                                     border: none !important;
                                     background: transparent !important;
+                                    break-before: page !important;
+                                    page-break-before: always !important;
                                 }
                                 .page-break::after {
                                     content: none !important;
@@ -3020,6 +3251,20 @@ But I [D]don't know [A7sus4]how
                                     z-index: 10 !important;
                                     -webkit-print-color-adjust: exact !important;
                                 }
+                                .abc-block {
+                                    background: transparent !important;
+                                    overflow: visible !important;
+                                    width: 100% !important;
+                                    padding: 0 5px !important;
+                                    margin-top: ${abcSpacing}px !important;
+                                    margin-bottom: ${abcSpacing}px !important;
+                                    break-inside: avoid !important;
+                                    page-break-inside: avoid !important;
+                                }
+                                .abc-block svg {
+                                    display: block !important;
+                                    margin: 0 auto !important;
+                                }
                             `;
                             clonedDoc.head.appendChild(style);
                         }
@@ -3027,6 +3272,9 @@ But I [D]don't know [A7sus4]how
                     jsPDF: { unit: 'mm', format: format, orientation: orientation },
                     pagebreak: { mode: ['css', 'legacy'] }
                 };
+
+                // Small delay to ensure all SVGs and layouts are stable
+                await new Promise(resolve => setTimeout(resolve, 500));
 
                 await html2pdf().set(opt).from(exportContent).save();
                 closeExportOverlay();
@@ -3494,6 +3742,7 @@ But I [D]don't know [A7sus4]how
                 content.innerHTML = source.innerHTML;
                 // Re-apply styles to the content in the overlay
                 applyStyles();
+                renderAbcBlocks(content);
             }
         }
 
@@ -4258,5 +4507,46 @@ But I [D]don't know [A7sus4]how
 
         updatePreview();
     </script>
+
+    <!-- Floating Panels (Moved to body root for z-index stacking context) -->
+    <div id="panel-abc-editor" class="app-panel floating-panel no-print">
+        <div class="app-panel-header">
+            <span class="app-panel-title">ABC Sheet Music</span>
+            <button onclick="closeApp()" class="p-1 hover:bg-slate-100 rounded-full">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+        <div class="app-panel-content">
+            <div class="sidebar-section">
+                <div class="flex flex-col gap-3">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[12px] text-black font-bold uppercase">ABC Notation</label>
+                        <textarea id="abc-input" class="w-full h-48 border border-black rounded p-2 text-[12px] font-mono" spellcheck="false">X: 1
+T: ABC Music
+M: 4/4
+L: 1/8
+|:CDEF GABc | cdef gabc':|</textarea>
+                    </div>
+                    
+                    <div id="abc-warnings" class="bg-red-50 text-red-600 p-2 rounded text-[11px] border border-red-200 hidden"></div>
+                    
+                    <div id="abc-audio" class="w-full"></div>
+                    
+                    <div id="abc-paper" class="w-full bg-white border border-slate-200 rounded min-h-[100px]"></div>
+                    
+                    <div class="flex gap-2">
+                        <button onclick="insertAbcToEditor()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-[13px] font-bold transition-colors">
+                            Insert to Song
+                        </button>
+                        <button id="abc-midi-download-btn" class="px-3 bg-slate-100 hover:bg-slate-200 text-black rounded text-[13px] font-bold transition-colors flex items-center gap-1">
+                            <i data-lucide="download" class="w-3 h-3"></i>
+                            MIDI
+                        </button>
+                    </div>
+                    <a id="abc-midi-download-link" class="hidden" download="music.mid"></a>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
