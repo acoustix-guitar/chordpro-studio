@@ -114,12 +114,12 @@
 	font-family: sans-serif;
 	font-size: 16px;
 	box-sizing: border-box;
-	color: #f4f4f4;
+	color: #ffffff !important;
 }
 
 .abcjs-inline-audio .abcjs-tempo-wrapper {
 	font-size: 10px;
-	color: #f4f4f4;
+	color: #ffffff !important;
 	box-sizing: border-box;
 	display: flex;
 	align-items: center;
@@ -127,11 +127,13 @@
 
 .abcjs-inline-audio .abcjs-midi-tempo {
 	border-radius: 2px;
-	border: none;
+	border: 1px solid #666666;
 	margin: 0 2px 0 4px;
 	width: 42px;
 	padding-left: 2px;
 	box-sizing: border-box;
+	background-color: #222222 !important;
+	color: #ffffff !important;
 }
 
 .abcjs-inline-audio .abcjs-loading .abcjs-loading-svg {
@@ -179,13 +181,17 @@
 	margin-right: 10px;
 	margin-left: 10px;
 	margin-top: -1px;
+	color: #ffffff !important;
 }
 .abcjs-large .abcjs-midi-tempo {
 	font-size: 20px;
 	width: 50px;
+	background-color: #222222 !important;
+	color: #ffffff !important;
 }
 .abcjs-large .abcjs-tempo-wrapper {
 	font-size: 20px;
+	color: #ffffff !important;
 }
 
 .abcjs-css-warning {
