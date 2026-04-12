@@ -80,6 +80,9 @@
             const abcPanel = document.getElementById('panel-abc-editor');
             if (abcPanel) makeDraggable(abcPanel);
 
+            const transposerPanel = document.getElementById('panel-abc-transposer');
+            if (transposerPanel) makeDraggable(transposerPanel);
+
             setTimeout(() => {
                 if (typeof ABCJS === 'undefined') {
                     console.error("ABCJS failed to load from CDN");
@@ -1508,6 +1511,10 @@
                         <button onclick="openApp('abc-editor')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-1.5 rounded text-[13px] font-bold flex items-center justify-center gap-2">
                             <i data-lucide="file-music" class="w-4 h-4"></i>
                             Sheet Music (ABC)
+                        </button>
+                        <button onclick="openApp('abc-transposer')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-1.5 rounded text-[13px] font-bold flex items-center justify-center gap-2">
+                            <i data-lucide="arrow-up-down" class="w-4 h-4"></i>
+                            ABC Transposer
                         </button>
                     </div>
                 </div>
@@ -4570,6 +4577,17 @@ L: 1/8
                     <a id="abc-midi-download-link" class="hidden" download="music.mid"></a>
                 </div>
             </div>
+        </div>
+    </div>
+    <div id="panel-abc-transposer" class="app-panel floating-panel no-print" style="width: 800px !important; left: calc(50% - 400px);">
+        <div class="app-panel-header">
+            <span class="app-panel-title">ABC Transposer</span>
+            <button onclick="closeApp()" class="p-1 hover:bg-slate-100 rounded-full">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+        <div class="app-panel-content" style="padding: 0; height: 600px;">
+            <iframe src="abc-transposer.html" class="w-full h-full border-0"></iframe>
         </div>
     </div>
 </body>

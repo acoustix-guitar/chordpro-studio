@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABC Transposer - ChordPro Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/abcjs/6.2.2/abcjs-basic-min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; }
+        textarea { font-family: 'Roboto Mono', monospace; font-size: 14px; }
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-primary { background-color: #2563eb; color: white; }
+        .btn-primary:hover { background-color: #1d4ed8; }
+        .btn-outline { border: 1px solid #e2e8f0; background-color: white; }
+        .btn-outline:hover { background-color: #f1f5f9; }
+        #abc-paper { background: white; border-radius: 0.75rem; border: 1px solid #e2e8f0; min-height: 200px; padding: 1rem; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        <header id="main-header" class="mb-8 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight">ABC Notation Transposer</h1>
+                <p class="text-slate-500">Transpose your ABC notation step-by-step up or down.</p>
+            </div>
+            <a href="chord-pro-studio.html" class="btn btn-outline">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                Back to Editor
+            </a>
+        </header>
+
+        <script>
+            if (window.self !== window.top) {
+                document.getElementById('main-header').style.display = 'none';
+                document.body.style.padding = '1rem';
+            }
+        </script>
+
+        <div class="grid lg:grid-cols-2 gap-8">
+            <!-- Input Section -->
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <label class="font-bold text-sm uppercase tracking-wider text-slate-500">Original ABC</label>
+                    <button onclick="clearInput()" class="text-red-600 text-sm font-semibold hover:underline">Clear</button>
+                </div>
+                <textarea id="input-abc" class="w-full h-64 p-4 rounded-xl border border-slate-200 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white" placeholder="Paste or type your ABC code here..." spellcheck="false"></textarea>
+                
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="transpose(-1)" class="btn btn-outline flex-1 justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>
+                        Lower Semitone
+                    </button>
+                    <button onclick="transpose(1)" class="btn btn-outline flex-1 justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                        Higher Semitone
+                    </button>
+                    <button onclick="resetTranspose()" class="btn btn-outline px-3" title="Reset">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Output Section -->
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <label class="font-bold text-sm uppercase tracking-wider text-slate-500">Transposed ABC</label>
+                    <div class="flex gap-2">
+                        <span id="transpose-info" class="text-blue-600 font-bold text-sm bg-blue-50 px-2 py-1 rounded">0 Semitones</span>
+                        <button onclick="copyToClipboard()" class="btn btn-primary py-1 px-3 text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                            Copy
+                        </button>
+                    </div>
+                </div>
+                <textarea id="output-abc" readonly class="w-full h-64 p-4 rounded-xl border border-slate-200 bg-slate-50 shadow-sm outline-none" placeholder="Transposed result will appear here..."></textarea>
+            </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="mt-12 space-y-4">
+            <label class="font-bold text-sm uppercase tracking-wider text-slate-500">Preview (Transposed)</label>
+            <div id="abc-paper"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentTranspose = 0;
+        let transposeTimeout = null;
+
+        function clearInput() {
+            document.getElementById('input-abc').value = '';
+            document.getElementById('output-abc').value = '';
+            currentTranspose = 0;
+            updateTransposeInfo();
+            renderPreview('');
+        }
+
+        function updateTransposeInfo() {
+            const info = document.getElementById('transpose-info');
+            info.textContent = `${currentTranspose > 0 ? '+' : ''}${currentTranspose} Semitones`;
+        }
+
+        function resetTranspose() {
+            currentTranspose = 0;
+            updateTransposeInfo();
+            runTranspose();
+        }
+
+        function transpose(delta) {
+            currentTranspose += delta;
+            updateTransposeInfo();
+            runTranspose();
+        }
+
+        function runTranspose() {
+            const input = document.getElementById('input-abc').value;
+            if (!input.trim()) {
+                document.getElementById('output-abc').value = '';
+                renderPreview('');
+                return;
+            }
+
+            const transposed = performTranspose(input, currentTranspose);
+            document.getElementById('output-abc').value = transposed;
+            renderPreview(transposed);
+        }
+
+        // Handle live editing and paste
+        const inputArea = document.getElementById('input-abc');
+        
+        inputArea.addEventListener('input', () => {
+            if (transposeTimeout) clearTimeout(transposeTimeout);
+            transposeTimeout = setTimeout(() => {
+                runTranspose();
+            }, 300);
+        });
+
+        inputArea.addEventListener('paste', () => {
+            // Reset transposition when new content is pasted
+            currentTranspose = 0;
+            updateTransposeInfo();
+            // runTranspose will be triggered by the 'input' event following the paste
+        });
+
+        function renderPreview(abc) {
+            if (!abc) {
+                document.getElementById('abc-paper').innerHTML = '';
+                return;
+            }
+            // Use requestAnimationFrame to avoid blocking the UI thread during typing
+            requestAnimationFrame(() => {
+                try {
+                    ABCJS.renderAbc("abc-paper", abc, {
+                        responsive: "resize",
+                        paddingright: 30,
+                        paddingleft: 10,
+                        paddingbottom: 0,
+                        staffwidth: 740
+                    });
+                } catch (e) {
+                    console.error("ABCJS Render Error:", e);
+                }
+            });
+        }
+
+        function copyToClipboard() {
+            const output = document.getElementById('output-abc');
+            output.select();
+            document.execCommand('copy');
+            
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Copied!';
+            setTimeout(() => btn.innerHTML = originalText, 2000);
+        }
+
+        // --- Transposition Logic ---
+        
+        const noteMap = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const flatMap = { 'Db': 'C#', 'Eb': 'D#', 'Gb': 'F#', 'Ab': 'G#', 'Bb': 'A#' };
+        
+        function getKeyAccidentals(keyName) {
+            const sharps = ['F', 'C', 'G', 'D', 'A', 'E', 'B'];
+            const flats = ['B', 'E', 'A', 'D', 'G', 'C', 'F'];
+            const keyMap = {
+                'C': 0, 'G': 1, 'D': 2, 'A': 3, 'E': 4, 'B': 5, 'F#': 6, 'C#': 7,
+                'F': -1, 'Bb': -2, 'Eb': -3, 'Ab': -4, 'Db': -5, 'Gb': -6, 'Cb': -7,
+                'Am': 0, 'Em': 1, 'Bm': 2, 'F#m': 3, 'C#m': 4, 'G#m': 5, 'D#m': 6, 'A#m': 7,
+                'Dm': -1, 'Gm': -2, 'Cm': -3, 'Fm': -4, 'Bbm': -5, 'Ebm': -6, 'Abm': -7
+            };
+            
+            let cleanKey = keyName.split('%')[0].trim();
+            let rootMatch = cleanKey.match(/^[A-G][#b]?m?/i);
+            if (!rootMatch) return { 'C': 0, 'D': 0, 'E': 0, 'F': 0, 'G': 0, 'A': 0, 'B': 0 };
+            
+            let key = rootMatch[0];
+            key = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
+            
+            let count = keyMap[key] || 0;
+            let accidentals = { 'C': 0, 'D': 0, 'E': 0, 'F': 0, 'G': 0, 'A': 0, 'B': 0 };
+            
+            if (count > 0) {
+                for (let i = 0; i < count; i++) accidentals[sharps[i]] = 1;
+            } else if (count < 0) {
+                for (let i = 0; i < Math.abs(count); i++) accidentals[flats[i]] = -1;
+            }
+            
+            return accidentals;
+        }
+
+        function performTranspose(abc, semitones) {
+            if (semitones === 0) return abc;
+            
+            let lines = abc.split('\n');
+            let oldKeyAcc = getKeyAccidentals('C');
+            let newKeyAcc = getKeyAccidentals('C');
+
+            return lines.map(line => {
+                if (line.match(/^[A-Z]:/)) {
+                    if (line.startsWith('K:')) {
+                        const oldKeyMatch = line.match(/^K:\s*([A-G][#b]?m?[^%\s]*)/i);
+                        if (oldKeyMatch) {
+                            oldKeyAcc = getKeyAccidentals(oldKeyMatch[1]);
+                        }
+                        
+                        let result = transposeKey(line, semitones);
+                        newKeyAcc = getKeyAccidentals(result.keyName);
+                        return result.line;
+                    }
+                    return line;
+                }
+                return transposeMusicLine(line, semitones, oldKeyAcc, newKeyAcc);
+            }).join('\n');
+        }
+
+        function transposeKey(line, semitones) {
+            const keyMatch = line.match(/^K:\s*([A-G][#b]?)(.*)/i);
+            if (!keyMatch) return { line, keyName: 'C' };
+            
+            let keyRoot = keyMatch[1];
+            let rest = keyMatch[2];
+            let transposedRoot = shiftNote(keyRoot, semitones);
+            
+            const standardKeys = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#', 'F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb'];
+            if (!standardKeys.includes(transposedRoot)) {
+                let enharmonics = { 'A#': 'Bb', 'D#': 'Eb', 'G#': 'Ab', 'Db': 'C#', 'Gb': 'F#' };
+                if (enharmonics[transposedRoot]) transposedRoot = enharmonics[transposedRoot];
+            }
+
+            return { 
+                line: `K: ${transposedRoot}${rest}`, 
+                keyName: `${transposedRoot}${rest}` 
+            };
+        }
+
+        function shiftNote(note, semitones, preferFlats = false) {
+            let normalized = note;
+            if (flatMap[note]) normalized = flatMap[note];
+            let index = noteMap.indexOf(normalized.toUpperCase());
+            if (index === -1) return note;
+            let newIndex = (index + semitones) % 12;
+            while (newIndex < 0) newIndex += 12;
+            let result = noteMap[newIndex];
+            if (preferFlats) {
+                const toFlats = { 'C#': 'Db', 'D#': 'Eb', 'F#': 'Gb', 'G#': 'Ab', 'A#': 'Bb' };
+                if (toFlats[result]) result = toFlats[result];
+            }
+            return result;
+        }
+
+        function getABCNote(name, octave) {
+            if (octave === 0) return name;
+            if (octave === 1) return name.toLowerCase();
+            if (octave > 1) return name.toLowerCase() + "'".repeat(octave - 1);
+            if (octave < 0) return name + ",".repeat(Math.abs(octave));
+            return name;
+        }
+
+        function transposeMusicLine(line, semitones, oldKeyAcc, newKeyAcc) {
+            return line.replace(/(\^{1,2}|_{1,2}|=)?([A-Ga-g])([,']*)/g, (match, accidental, note, octaveMarks) => {
+                let baseNote = note.toUpperCase();
+                let isLower = note === note.toLowerCase();
+                
+                // 1. Calculate absolute semitone of original note using oldKeyAcc
+                let octave = (isLower ? 1 : 0);
+                if (octaveMarks) {
+                    for (let char of octaveMarks) {
+                        if (char === ',') octave -= 1;
+                        if (char === "'") octave += 1;
+                    }
+                }
+                
+                let naturalSemitone = noteMap.indexOf(baseNote);
+                let absoluteSemitone = naturalSemitone + (octave * 12);
+                
+                if (accidental === '^') absoluteSemitone += 1;
+                else if (accidental === '^^') absoluteSemitone += 2;
+                else if (accidental === '_') absoluteSemitone -= 1;
+                else if (accidental === '__') absoluteSemitone -= 2;
+                else if (accidental === '=') { /* Natural */ }
+                else {
+                    absoluteSemitone += oldKeyAcc[baseNote] || 0;
+                }
+                
+                // 2. Transpose
+                let transposedSemitone = absoluteSemitone + semitones;
+                
+                // 3. Find best representation in new key using newKeyAcc
+                let bestNote = '';
+                let bestAccidental = '';
+                let bestOctave = 0;
+                
+                const noteNames = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+                
+                // Priority 1: Check if the target semitone matches a note in the new key signature
+                outer: for (let oct = -4; oct <= 4; oct++) {
+                    for (let name of noteNames) {
+                        let nameSemitone = noteMap.indexOf(name);
+                        let keyAcc = newKeyAcc[name] || 0;
+                        let currentAbs = nameSemitone + (oct * 12) + keyAcc;
+                        
+                        if (currentAbs === transposedSemitone) {
+                            bestNote = name;
+                            bestAccidental = '';
+                            bestOctave = oct;
+                            break outer;
+                        }
+                    }
+                }
+                
+                // Priority 2: If no natural match, find the closest note name and add accidental
+                if (!bestNote) {
+                    outer2: for (let oct = -4; oct <= 4; oct++) {
+                        for (let name of noteNames) {
+                            let nameSemitone = noteMap.indexOf(name);
+                            let keyAcc = newKeyAcc[name] || 0;
+                            let currentAbs = nameSemitone + (oct * 12) + keyAcc;
+                            
+                            if (currentAbs + 1 === transposedSemitone) {
+                                bestNote = name;
+                                bestAccidental = (keyAcc === -1) ? '=' : '^';
+                                bestOctave = oct;
+                                break outer2;
+                            }
+                            if (currentAbs - 1 === transposedSemitone) {
+                                bestNote = name;
+                                bestAccidental = (keyAcc === 1) ? '=' : '_';
+                                bestOctave = oct;
+                                break outer2;
+                            }
+                        }
+                    }
+                }
+                
+                if (!bestNote) return match; // Fallback
+
+                return bestAccidental + getABCNote(bestNote, bestOctave);
+            });
+        }
+    </script>
+</body>
+</html>
