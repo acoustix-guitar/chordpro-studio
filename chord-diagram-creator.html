@@ -383,11 +383,11 @@
             
             const color = '#000000';
             
-            let svg = `<svg width="${size}" height="${Math.round(size * (totalHeight / width))}" viewBox="0 0 ${width} ${totalHeight}" xmlns="http://www.w3.org/2000/svg" style="font-family: ${font}; background: transparent;">`;
+            let svg = `<svg width="${size}" height="${Math.round(size * (totalHeight / width))}" viewBox="0 0 ${width} ${totalHeight}" xmlns="http://www.w3.org/2000/svg" style="font-family: ${font}; font-style: normal; background: transparent;">`;
             
             // Chord Name
             const gridCenterX = marginLeft + (gridWidth / 2);
-            svg += `<text x="${gridCenterX}" y="${textY}" text-anchor="middle" font-family="${font}" font-size="${nameSize}" font-weight="bold" fill="${color}">${name}</text>`;
+            svg += `<text x="${gridCenterX}" y="${textY}" text-anchor="middle" font-family="${font}" font-size="${nameSize}" font-weight="bold" font-style="normal" fill="${color}">${name}</text>`;
             
             // Vertical lines (strings)
             for (let i = 0; i < 6; i++) {
@@ -404,7 +404,7 @@
             
             // Base Fret Number
             if (baseFret > 1) {
-                svg += `<text x="${marginLeft - 5}" y="${gridTop + 0.7 * fretSpacing}" text-anchor="end" font-family="${font}" font-size="12" font-weight="bold" fill="${color}">${baseFret}fr</text>`;
+                svg += `<text x="${marginLeft - 5}" y="${gridTop + 0.7 * fretSpacing}" text-anchor="end" font-family="${font}" font-size="12" font-weight="bold" font-style="normal" fill="${color}">${baseFret}fr</text>`;
             }
             
             // Barre
@@ -427,7 +427,7 @@
 
                 if (f === -1) {
                     if (!isCoveredByBarre) {
-                        svg += `<text x="${x}" y="${gridTop - 4}" text-anchor="middle" font-family="${font}" font-size="12" font-weight="bold" fill="${color}">X</text>`;
+                        svg += `<text x="${x}" y="${gridTop - 4}" text-anchor="middle" font-family="${font}" font-size="12" font-weight="bold" font-style="normal" fill="${color}">X</text>`;
                     }
                 } else if (f === 0) {
                     if (!isCoveredByBarre) {
@@ -440,12 +440,12 @@
                         
                         if (onlyFingers && finger) {
                             // Draw only finger text in black
-                            svg += `<text x="${x}" y="${y + 4.5}" text-anchor="middle" font-family="${font}" font-size="12" font-weight="bold" fill="${color}">${finger}</text>`;
+                            svg += `<text x="${x}" y="${y + 4.5}" text-anchor="middle" font-family="${font}" font-size="12" font-weight="bold" font-style="normal" fill="${color}">${finger}</text>`;
                         } else {
                             // Draw circle and white finger text if exists
                             svg += `<circle cx="${x}" cy="${y}" r="5" fill="${color}" />`;
                             if (finger) {
-                                svg += `<text x="${x}" y="${y + 4}" text-anchor="middle" font-family="${font}" font-size="12" font-weight="bold" fill="white">${finger}</text>`;
+                                svg += `<text x="${x}" y="${y + 4}" text-anchor="middle" font-family="${font}" font-size="12" font-weight="bold" font-style="normal" fill="white">${finger}</text>`;
                             }
                         }
                     }

@@ -2133,10 +2133,10 @@
             const fretSpacing = (height - 2 * margin - 20) / 5;
             
             const svgHeight = Math.round(size * (height / width));
-            let svg = `<div class="diagram-item" style="width: ${size}px"><svg width="${size}" height="${svgHeight}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">`;
+            let svg = `<div class="diagram-item" style="width: ${size}px"><svg width="${size}" height="${svgHeight}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" style="font-style: normal;">`;
             
             // Title
-            svg += `<text x="${width/2}" y="${nameGap}" text-anchor="middle" font-family="Arial" font-size="${nameSize}" font-weight="bold" fill="${color}">${name}</text>`;
+            svg += `<text x="${width/2}" y="${nameGap}" text-anchor="middle" font-family="Arial" font-size="${nameSize}" font-weight="bold" font-style="normal" fill="${color}">${name}</text>`;
             
             // Vertical lines (strings)
             for (let i = 0; i < 6; i++) {
@@ -2153,7 +2153,7 @@
 
             // Base Fret Number
             if (baseFret > 1) {
-                svg += `<text x="${margin - 8}" y="${margin + 10 + 0.7 * fretSpacing}" text-anchor="end" font-family="Arial" font-size="12" font-weight="bold" fill="${color}">${baseFret}fr</text>`;
+                svg += `<text x="${margin - 8}" y="${margin + 10 + 0.7 * fretSpacing}" text-anchor="end" font-family="Arial" font-size="12" font-weight="bold" font-style="normal" fill="${color}">${baseFret}fr</text>`;
             }
             
             // Barre
