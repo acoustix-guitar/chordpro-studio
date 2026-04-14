@@ -768,23 +768,32 @@
             flex-direction: column; 
             margin-right: 0.3em; 
             justify-content: flex-end;
+            position: relative;
         }
-        ::placeholder {
-            color: #000000 !important;
-            opacity: 1; /* Firefox */
+        .word-group.has-bar {
+            border-left: 1.5px solid #000;
+            padding-left: 0.5em;
+            margin-left: 0.2em;
         }
         .chord { 
             display: block; 
             font-weight: bold; 
             white-space: nowrap; 
-            line-height: 1;
+            line-height: 1.2;
             color: #000000 !important;
+        }
+        .chord:empty {
+            height: 0;
+            overflow: hidden;
         }
         .lyrics { 
             display: block; 
             white-space: pre; 
-            line-height: 1;
+            line-height: 1.2;
             color: #000000 !important;
+        }
+        .lyrics:empty::before {
+            content: '\00a0';
         }
 
         .spacer { min-width: 1px; }
@@ -2669,8 +2678,15 @@ But I [D]don't know [A7sus4]how
                         }
                         i++; // skip ]
                         
+                        let hasBar = false;
+                        let displayChord = chord;
+                        if (chord.includes('|')) {
+                            hasBar = true;
+                            displayChord = chord.replace(/\|/g, '').trim();
+                        }
+
                         // Clean chord name for lookup
-                        const cleanChord = chord.trim();
+                        const cleanChord = displayChord.trim();
                         if (cleanChord) usedChords.add(cleanChord);
 
                         // Collect lyrics until next chord or end of line
@@ -2680,7 +2696,9 @@ But I [D]don't know [A7sus4]how
                             i++;
                         }
                         
-                        mainHtml += `<div class="word-group"><span class="chord">${chord}</span><span class="lyrics">${lyrics || '&nbsp;'}</span></div>`;
+                        const barClass = hasBar ? ' has-bar' : '';
+                        const chordHtml = (hasBar || displayChord) ? (displayChord || '&nbsp;') : '';
+                        mainHtml += `<div class="word-group${barClass}"><span class="chord">${chordHtml}</span><span class="lyrics">${lyrics || '&nbsp;'}</span></div>`;
                     } else {
                         let lyrics = '';
                         while (i < line.length && line[i] !== '[') {
@@ -3031,6 +3049,7 @@ But I [D]don't know [A7sus4]how
                 el.style.color = '#000000';
                 el.style.fontWeight = boldChords ? 'bold' : 'normal';
                 el.style.fontStyle = 'normal';
+                el.style.lineHeight = getVal('spacing-chords');
             });
 
             // Lyrics
@@ -3045,6 +3064,7 @@ But I [D]don't know [A7sus4]how
                 el.style.color = '#000000';
                 el.style.fontWeight = boldLyrics ? 'bold' : 'normal';
                 el.style.fontStyle = 'normal';
+                el.style.lineHeight = getVal('spacing-lyrics');
             });
 
             // TABs
